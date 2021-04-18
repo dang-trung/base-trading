@@ -1,0 +1,11 @@
+# Create conda env
+conda create -n [env-name]
+
+# Create conda env from environment.yml
+conda env create -f environment.yml -n [env-name]
+
+# Activate your Env
+conda activate [env-name]
+
+# Save your active Env to environment.yml
+conda env export > environment.yml
