@@ -2,9 +2,8 @@
 """
 Data Collector
 
-This script allows fetching historical prices of assets available on Yahoo!
-Finance and stored the data in csv files.
-
+The script allows fetching historical prices of assets available on Yahoo!
+Finance and storing the data in csv files.
 """
 import os
 
@@ -16,8 +15,6 @@ class Collector:
     """
     A class used to collect historical prices from the Yahoo! Finance
     database
-
-    ...
 
     Attributes
     ----------
@@ -38,7 +35,6 @@ class Collector:
     get_historical()
         Wrapper of fetch() to handle cases where data of the
         target asset has already been fetched before
-
     """
 
     def __init__(self, ticker, start, end, data_path):
