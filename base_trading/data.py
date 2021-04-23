@@ -51,8 +51,8 @@ class Collector:
             Path to store the fetched data
         """
         self.ticker = ticker
-        self.start = start
-        self.end = end
+        self.start = pd.to_datetime(start)
+        self.end = pd.to_datetime(end)
         self.data_path = data_path
 
     def fetch(self):
@@ -86,9 +86,17 @@ class Collector:
         """
         if os.path.exists(self.data_path):
             data = pd.read_csv(self.data_path, index_col=0)
-            first_date = data['Date'][0]
-            if pd.to_datetime(first_date) > pd.to_datetime(self.start):
+            data['Date'] = pd.to_datetime(data['Date'])
+            first_date, end_date = data.iloc[0, 0], data.iloc[-1, 0]
+
+            # Fetch new data if we do not have the dates required on our cache yet
+            if first_date > self.start or end_date < self.end:
                 data = self.fetch()
+            # Or simply filter to avoid calling the API again
+            else:
+                mask = (self.start < data['Date']) & (data['Date'] < self.end)
+                data = data[mask]
+                data.reset_index(drop=True, inplace=True)
         else:
             data = self.fetch()
         return data
@@ -109,4 +117,3 @@ if __name__ == '__main__':
 
     collector = Collector(ticker, start, end, data_path)
     data = collector.get_historical()
-    print(data.shape)
