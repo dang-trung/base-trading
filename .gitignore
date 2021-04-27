@@ -38,6 +38,4 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-
-# Other
-/data/
+.csv

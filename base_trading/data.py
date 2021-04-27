@@ -37,7 +37,7 @@ class Collector:
         target asset has already been fetched before
     """
 
-    def __init__(self, ticker, start, end, data_path):
+    def __init__(self, ticker, source, start, end, data_path):
         """
         Parameters
         ----------
@@ -51,6 +51,10 @@ class Collector:
             Path to store the fetched data
         """
         self.ticker = ticker
+        self.source = source
+        if self.source != "yahoo":
+            raise SourceNotSupported(
+                "Only Yahoo! Finance is supported at the moment.")
         self.start = pd.to_datetime(start)
         self.end = pd.to_datetime(end)
         self.data_path = data_path
@@ -67,7 +71,8 @@ class Collector:
             A DataFrame of historical prices fetched from Yahoo! Finance
         """
         try:
-            data = web.DataReader(self.ticker, 'yahoo', self.start, self.end)
+            data = web.DataReader(self.ticker, self.source, self.start,
+                                  self.end)
         except KeyError:
             raise NoTickerError(
                 f"{self.ticker} not available on Yahoo! Finance.")
@@ -89,7 +94,8 @@ class Collector:
             data['Date'] = pd.to_datetime(data['Date'])
             first_date, end_date = data.iloc[0, 0], data.iloc[-1, 0]
 
-            # Fetch new data if we do not have the dates required on our cache yet
+            # Fetch new data if we do not have the dates required on our
+            # cache yet
             if first_date > self.start or end_date < self.end:
                 data = self.fetch()
             # Or simply filter to avoid calling the API again
@@ -105,6 +111,13 @@ class Collector:
 class NoTickerError(Exception):
     """
     Raised when the ticker is not available on Yahoo! Finance
+    """
+    pass
+
+
+class SourceNotSupported(Exception):
+    """
+    Raised when the data source is unsupported
     """
     pass
 

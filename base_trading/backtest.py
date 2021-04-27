@@ -151,31 +151,36 @@ class BaseTrader:
         n = len(X) - 1
         stats["Start"] = X.loc[0, "Date"]
         stats["End"] = X.loc[n, "Date"]
-        stats["Duration"] = stats["End"] - stats["Start"]
+        stats["Duration"] = (stats["End"] - stats["Start"]).apply(lambda x: f"{x.days} days")
         stats["Initial Cash"] = self.init_cash
 
         for strategy in ["Buy & Hold", "Base Trading"]:
-            stats.loc[strategy, "Ending Cash"] = round(X.loc[n, strategy])
+            stats.loc[strategy, "Ending Cash"] = X.loc[n, strategy]
 
         stats["Total Profit"] = stats["Ending Cash"] - stats["Initial Cash"]
-        stats["Total Return (%)"] = (stats["Total Profit"] /
+        stats["Profit Margin (%)"] = (stats["Total Profit"] /
                                      stats["Initial Cash"] * 100)
-        stats["Benchmark Return (%)"] = stats.loc[
-            "Buy & Hold", "Total Return (%)"]
-        stats.loc["Buy & Hold", "Daily Return (%)"] = np.average(
+        stats["Profit Margin (%)"] = stats["Profit Margin (%)"].apply(lambda x: f"{int(x):,}% ({round(x / 100, 2)}x)")
+        stats["Initial Cash"] = stats["Initial Cash"].apply(lambda x: f"${x:,}")
+        stats["Ending Cash"] = stats["Ending Cash"].apply(lambda x: f"${int(x):,}")
+        stats["Total Profit"] = stats["Total Profit"].apply(lambda x: f"${int(x):,}")
+        stats.loc["Buy & Hold", "Annualized Return (%)"] = np.average(
             X["Market Return"][2:])
-        stats.loc["Buy & Hold", "Daily Volatility (%)"] = np.std(
+        stats.loc["Base Trading", "Annualized Return (%)"] = np.average(
+            X["Strategy Return"][2:])
+        stats["Annualized Return (%)"] = ((stats["Annualized Return (%)"] + 1)** 365 - 1) * 100
+        stats.loc["Buy & Hold", "Annualized Volatility (%)"] = np.std(
             X["Market Return"][2:])
-        stats.loc["Base Trading", "Daily Return (%)"] = np.average(
-            X["Strategy Return"][2:])
-        stats.loc["Base Trading", "Daily Volatility (%)"] = np.std(
-            X["Strategy Return"][2:])
-        stats["Sharpe Ratio"] = ((stats["Daily Return (%)"] - 0.001) /
-                                 stats["Daily Volatility (%)"])
+        stats.loc["Base Trading", "Annualized Volatility (%)"] = np.std(
+            X["Strategy Return"][2:]) 
+        stats["Annualized Volatility (%)"] = (stats["Annualized Volatility (%)"]) * np.sqrt(365) * 100
+        stats["Sharpe Ratio"] = ((stats["Annualized Return (%)"] - 0.08) /
+                                 stats["Annualized Volatility (%)"])
+        stats["Annualized Return (%)"] = stats["Annualized Return (%)"].apply(lambda x: f"{round(x, 2)}%")
+        stats["Annualized Volatility (%)"] = stats["Annualized Volatility (%)"].apply(lambda x: f"{round(x, 2)}%")
+        stats["Sharpe Ratio"] = stats["Sharpe Ratio"].apply(lambda x: round(x, 2))
+        
         stats = stats.T.reset_index()
         stats.rename(columns={"index": "Metrics"}, inplace=True)
         return stats
 
-
-if __name__ == '__main__':
-    pass
