@@ -19,7 +19,8 @@ from data import Collector, SourceNotSupported
 from backtest import BaseTrader
 from visual import make_figure
 
-app = dash.Dash(external_stylesheets=[dbc.themes.SIMPLEX])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SIMPLEX])
+server = app.server
 
 LOGO = "https://raw.githubusercontent.com/dang-trung/base-trading/master" \
        "/assets/logo.png"
