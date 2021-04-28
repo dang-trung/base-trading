@@ -20,6 +20,7 @@ from backtest import BaseTrader
 from visual import make_figure
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SIMPLEX])
+app.title('Base Trading: Buy the Dip, Sell the Hype')
 server = app.server
 
 LOGO = "https://raw.githubusercontent.com/dang-trung/base-trading/master" \
