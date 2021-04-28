@@ -1,1 +1,1 @@
-web: gunicorn app:server
+web: gunicorn --pythonpath base_trading.app
