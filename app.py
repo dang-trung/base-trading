@@ -15,9 +15,9 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-from data import Collector, SourceNotSupported
-from backtest import BaseTrader
-from visual import make_figure
+from base_trading.data import Collector, SourceNotSupported
+from base_trading.backtest import BaseTrader
+from base_trading.visual import make_figure
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SIMPLEX])
 app.title = 'Base Trading: Buy the Dip, Sell the Hype'

@@ -1,1 +1,1 @@
-web: gunicorn base_trading.app
+web: gunicorn app:server
