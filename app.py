@@ -8,6 +8,7 @@ Plotly Dash.
 """
 import os
 from datetime import date
+import time
 
 import dash
 import dash_bootstrap_components as dbc
@@ -17,55 +18,60 @@ from dash.dependencies import Input, Output, State
 
 from base_trading.data import Collector, SourceNotSupported
 from base_trading.backtest import BaseTrader
-from base_trading.visual import make_figure
+from base_trading.visual import make_figure, COLORS
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SIMPLEX])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.SLATE])
 app.title = 'Base Trading: Buy the Dip, Sell the Hype'
 server = app.server
 
-LOGO = "https://raw.githubusercontent.com/dang-trung/base-trading/master" \
-       "/assets/logo.png"
-navbar = dbc.Navbar(
+# -------------------------------- Navbar --------------------------------
+LOGO_PATH = "https://raw.githubusercontent.com/dang-trung/base-trading/master" \
+    "/assets/logo.png"
+
+logo = dbc.Col(
+    html.Img(src=LOGO_PATH, height="30px", style={
+             "padding-left": "2em", "padding-right": "1em"}),
+    width="auto"
+)
+
+brand = dbc.Col(
+    dbc.NavbarBrand("Base Trading Backtester", style={"font-size": "1.4rem"}),
+    width="auto"
+)
+
+
+dropdown = dbc.Col(
+    dbc.DropdownMenu(
+        label="More",
+        children=[
+            dbc.DropdownMenuItem(
+                "Source Code", href="https://github.com/dang-trung/base-trading"
+            ),
+            dbc.DropdownMenuItem(
+                "Feedback/Bug Report", href=f"mailto:dangtrung96@gmail.com"
+            ),
+        ],
+    ),
+    width={"offset": 7},
+    style={"padding-left": "5em"}
+)
+
+navbar = html.Div(
     [
         dbc.Row(
-            [
-                dbc.Col(html.Img(
-                    src=LOGO,
-                    height="30px",
-                    style={"padding-right": "1rem"}
-                )
-                ),
-                dbc.Col(
-                    dbc.NavbarBrand(
-                        "Base Trader",
-                        style={"font-size": "1.4rem"}
-                    ),
-                ),
-                dbc.Col(
-                    dbc.DropdownMenu(
-                        label="See More",
-                        children=[
-                            dbc.DropdownMenuItem("Source Code",
-                                                 href=f"https://github.com/"
-                                                      "dang-trung/base-trading"
-                                                 ),
-                            dbc.DropdownMenuItem("Request",
-                                                 href=f"mailto:dangtrung96"
-                                                      "@gmail.com"),
-                        ]
-                    ),
-                )
-            ],
-            align="center",
-            no_gutters=True,
+            [logo, brand, dropdown],
+            align="center", no_gutters=True
         ),
     ],
-    className="navbar navbar-expand-lg fixed-top navbar-light bg-light",
+    # className="navbar navbar-expand-lg navbar-dark bg-dark",
+    style={"background-color": "#1c1e22"}
 )
+
+# -------------------------------- App Settings --------------------------------
 
 inputs = html.Div(
     [
-        html.H2("Settings", className="display-5"),
+        html.H2("Settings"),
         html.P(),
         dbc.Row(
             [
@@ -114,7 +120,7 @@ inputs = html.Div(
                             dbc.InputGroupAddon(
                                 "Start Date", addon_type="prepend"),
                             dbc.Input(id="start-date", type="date",
-                                      value=date(2010, 1, 1))
+                                      value=date(2016, 1, 1))
                         ]
                     )
                 ),
@@ -129,7 +135,7 @@ inputs = html.Div(
                             dbc.InputGroupAddon(
                                 "End Date", addon_type="prepend"),
                             dbc.Input(id="end-date", type="date",
-                                      value=date(2020, 4, 1))
+                                      value=date(2021, 4, 1))
                         ]
                     )
                 ),
@@ -229,7 +235,8 @@ inputs = html.Div(
         dbc.Row(
             [
                 dbc.Col(
-                    dbc.Button("Submit", id="submit-button", n_clicks=0)
+                    dbc.Button("Submit", id="submit-button",
+                               n_clicks=0, color="dark")
                 ),
             ]
         )
@@ -237,57 +244,148 @@ inputs = html.Div(
     className="jumbotron",
 )
 
-graph = html.Div(
+# -------------------------------- App Outputs --------------------------------
+price_graph = html.Div(
     [
-        html.H2("Price & Signals", className="display-5"),
+        html.H2("Price & Signals"),
         html.P(),
-        html.Div(id="price-graph")
+        dbc.Spinner(html.Div(id="price-graph"))
+    ],
+    className="jumbotron"
+)
+
+strat_graph = html.Div(
+    [
+        html.H2("Portfolio Balance (Base Trading)"),
+        html.P(),
+        html.Div(id="strat-graph")
     ],
     className="jumbotron"
 )
 
 table = html.Div(
     [
-        html.H2("Performance", className="display-5"),
+        html.H2("Performance Comparison"),
         html.P(),
         html.Div(id="stats-table")
     ],
     className="jumbotron"
 )
 
+# ------------------------- Disclaimer, Footer, Instruction --------------------------------
 disclaimer = html.Div(
     [
-        html.H2("Disclaimer", className="display-5"),
+        html.H2("Disclaimer"),
         html.P(),
-        html.Div("This is a fun project only. No financial advises. DYOR.")
+        html.Div(
+            "This is just a fun project and NOT financial advice. As always, DYOR.")
     ],
     className="jumbotron"
 )
 
-app.layout = dbc.Container(
+MAIL_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading/692aba3c5db2bb655feda2e497918193a1a6b496/assets/gmail-white.svg"
+GITHUB_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading/692aba3c5db2bb655feda2e497918193a1a6b496/assets/github-white.svg"
+LINKEDIN_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading/692aba3c5db2bb655feda2e497918193a1a6b496/assets/linkedin-white.svg"
+
+footer = html.Div(
+    [
+        html.P(
+            [
+                "made by ",
+                html.A(html.B("Trung Dang"),
+                       href="https://dang-trung.github.io/"),
+                ", 2020 ",
+                html.Img(src=LOGO_PATH, height="30px",
+                         style={"padding-right": "1rem"})
+            ],
+        ),
+        html.P(
+            [
+                html.A(
+                    html.Img(src=MAIL_ICON, height="30px",
+                             style={"padding-right": "1rem"}),
+                    href="mailto:dangtrung96@gmail.com"
+                ),
+                html.A(
+                    html.Img(src=GITHUB_ICON, height="30px",
+                             style={"padding-right": "1rem"}),
+                    href="https://github.com/dang-trung"
+                ),
+                html.A(
+                    html.Img(src=LINKEDIN_ICON, height="30px",
+                             style={"padding-right": "1rem"}),
+                    href="https://www.linkedin.com/in/dang-trung/"
+                ),
+            ]
+        )
+    ],
+    style={"text-align": "center"}
+)
+
+collapse_button = dbc.Button(
+    "Feeling Confused?",
+    id="collapse-button",
+    className="mb-3",
+    color="primary",
+)
+
+instructions = html.Div(
+    [
+        html.H2("What Is Base Trading?"),
+        html.P(),
+        html.P('1. Support (or "Base") refers to the price level that an asset struggles to fall below over a given time period.'),
+        html.P("2. Use"),
+        html.P("3. Use"),
+        html.H2("How To Use"),
+        html.P(),
+        html.P("1. Use"),
+        html.P("2. Use"),
+        html.P("3. Use"),
+    ],
+    className="jumbotron"
+)
+# ------------------------------ Final Layout --------------------------------
+
+app.layout = html.Div(
     [
         navbar,
         html.P(),
-        dbc.Row(
+        dbc.Container(
             [
-                dbc.Col(graph, width=8),
-                dbc.Col(inputs, width=4),
-            ]
+                collapse_button,
+                dbc.Collapse(
+                    instructions,
+                    id="collapse",
+                ),
+                # dbc.Row(dbc.Col(instructions)),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                price_graph,
+                                strat_graph,
+                                table
+                            ], width=8
+                        ),
+                        dbc.Col(
+                            [
+                                inputs,
+                                disclaimer
+                            ]),
+                    ]
+                ),
+            ],
         ),
-        dbc.Row(
-            [
-                dbc.Col(table, width=8),
-                dbc.Col(disclaimer, width=4)
-            ]
-        ),
+        footer,
+        html.P()
     ],
-    style={"padding": "2em"}
 )
 
 
 @app.callback(
     [
         Output("price-graph", "children"),
+        Output("strat-graph", "children"),
         Output("stats-table", "children"),
     ],
     [
@@ -308,47 +406,53 @@ app.layout = dbc.Container(
 )
 def update_strat(n_clicks, ticker, source, start, end, price, init_cash,
                  max_pos, valid_days, break_support, break_resist):
-    colors = {
-        'background': None,
-        'text': None,
-        'buy': '#16c784',
-        'sell': '#ea3943',
-        'return': '#16c784'
-    }
-    if n_clicks:
-        data_path = os.path.join("data", f"{ticker}.csv")
-        break_support /= 100
-        break_resist /= 100
-        try:
-            collector = Collector(ticker, source, start, end, data_path)
-        except SourceNotSupported:
-            error_message = dbc.Alert(
-                "Sorry! Only Yahoo! Finance is supported at the moment.",
-                color="primary")
-            return error_message, error_message
-
-        data = collector.get_historical()
-
-        base_trader = BaseTrader(
-            price, valid_days, break_support, break_resist, max_pos, init_cash)
-        data, stats = base_trader.execute(data)
-
-        figure = make_figure(data, ticker, colors=colors)
-
-        figure = dcc.Graph(figure=figure)
-        stats = dbc.Table.from_dataframe(stats)
-
-        return figure, stats
-    else:
-        load_output = dbc.Button(
-            [
-                dbc.Spinner(size="sm"),
-                " Submit your inputs..."
-            ],
-            color="primary",
-            disabled=True,
+    data_path = os.path.join("data", f"{ticker}.csv")
+    break_support /= 100
+    break_resist /= 100
+    try:
+        collector = Collector(ticker, source, start, end, data_path)
+    except SourceNotSupported:
+        error_message = dbc.Alert(
+            "Sorry! Only Yahoo Finance is supported at the moment.",
+            color="primary"
         )
-        return load_output, load_output
+        return error_message, error_message, error_message
+
+    data = collector.get_historical()
+
+    base_trader = BaseTrader(
+        price, valid_days, break_support, break_resist, max_pos, init_cash)
+    data, stats = base_trader.execute(data)
+
+    figure, strat = make_figure(data, ticker, price, COLORS)
+
+    figure = dcc.Graph(figure=figure)
+    strat = dcc.Graph(figure=strat)
+    stats = dbc.Table.from_dataframe(stats)
+
+    if n_clicks:
+        return figure, strat, stats
+    return figure, strat, stats
+
+    # load_output = dbc.Button(
+    #     [
+    #         dbc.Spinner(size="sm"),
+    #         " Submit your inputs..."
+    #     ],
+    #     disabled=True,
+    # )
+    # return load_output, load_output, load_output
+
+
+@app.callback(
+    Output("collapse", "is_open"),
+    [Input("collapse-button", "n_clicks")],
+    [State("collapse", "is_open")],
+)
+def toggle_collapse(n, is_open):
+    if n:
+        return not is_open
+    return is_open
 
 
 if __name__ == '__main__':
