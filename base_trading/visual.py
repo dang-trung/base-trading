@@ -25,20 +25,26 @@ def make_figure(data, ticker, price, colors, scale="log"):
 
     trace_support = go.Scatter(x=data['Date'], y=data['Support Line'], mode='lines', showlegend=False,                             marker_color=colors['sell'])
     fig.add_trace(trace_support, row=1, col=1)
-
-    trace_buysignals = go.Scatter(x=data['Date'], y=data['Bought Price'],
-                                name='Buy', mode='markers',
-                                marker_color=colors['buy'],
-                                marker_symbol='triangle-up',
-                                marker_size=15)
-    fig.add_trace(trace_buysignals, row=1, col=1)
-
-    trace_sellsignals = go.Scatter(x=data['Date'], y=data['Sold Price'],
-                                name='Sell', mode='markers',
-                                marker_color=colors['sell'],
-                                marker_symbol='triangle-down',
-                                marker_size=15)
-    fig.add_trace(trace_sellsignals)
+    
+    try:
+        trace_buysignals = go.Scatter(x=data['Date'], y=data['Bought Price'],
+                                    name='Buy', mode='markers',
+                                    marker_color=colors['buy'],
+                                    marker_symbol='triangle-up',
+                                    marker_size=15)
+        fig.add_trace(trace_buysignals, row=1, col=1)
+    except KeyError:
+        print("No base broken.")
+    
+    try:
+        trace_sellsignals = go.Scatter(x=data['Date'], y=data['Sold Price'],
+                                    name='Sell', mode='markers',
+                                    marker_color=colors['sell'],
+                                    marker_symbol='triangle-down',
+                                    marker_size=15)
+        fig.add_trace(trace_sellsignals)
+    except KeyError:
+        print("No sell has been made. HODLING.")
 
     volume = go.Bar(x=data['Date'], y=data['Volume'], name='Volume',
                     opacity=1, marker_line_width=0, marker_color=colors['text'],

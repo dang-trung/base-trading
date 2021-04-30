@@ -8,13 +8,13 @@ Plotly Dash.
 """
 import os
 from datetime import date
-import time
 
 import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+from dash_html_components.A import A
 
 from base_trading.data import Collector, SourceNotSupported
 from base_trading.backtest import BaseTrader
@@ -51,6 +51,7 @@ dropdown = dbc.Col(
                 "Feedback/Bug Report", href=f"mailto:dangtrung96@gmail.com"
             ),
         ],
+        in_navbar=True
     ),
     width={"offset": 7},
     style={"padding-left": "5em"}
@@ -120,7 +121,7 @@ inputs = html.Div(
                             dbc.InputGroupAddon(
                                 "Start Date", addon_type="prepend"),
                             dbc.Input(id="start-date", type="date",
-                                      value=date(2016, 1, 1))
+                                      value=date(2018, 1, 1))
                         ]
                     )
                 ),
@@ -135,7 +136,7 @@ inputs = html.Div(
                             dbc.InputGroupAddon(
                                 "End Date", addon_type="prepend"),
                             dbc.Input(id="end-date", type="date",
-                                      value=date(2021, 4, 1))
+                                      value=date(2021, 1, 1))
                         ]
                     )
                 ),
@@ -232,6 +233,7 @@ inputs = html.Div(
             ]
         ),
         html.P(),
+        html.P(),
         dbc.Row(
             [
                 dbc.Col(
@@ -249,7 +251,7 @@ price_graph = html.Div(
     [
         html.H2("Price & Signals"),
         html.P(),
-        dbc.Spinner(html.Div(id="price-graph"))
+        dbc.Spinner(html.Div(id="price-graph")),
     ],
     className="jumbotron"
 )
@@ -258,7 +260,7 @@ strat_graph = html.Div(
     [
         html.H2("Portfolio Balance (Base Trading)"),
         html.P(),
-        html.Div(id="strat-graph")
+        dbc.Spinner(html.Div(id="strat-graph"))
     ],
     className="jumbotron"
 )
@@ -272,16 +274,7 @@ table = html.Div(
     className="jumbotron"
 )
 
-# ------------------------- Disclaimer, Footer, Instruction --------------------------------
-disclaimer = html.Div(
-    [
-        html.H2("Disclaimer"),
-        html.P(),
-        html.Div(
-            "This is just a fun project and NOT financial advice. As always, DYOR.")
-    ],
-    className="jumbotron"
-)
+# ------------------------- Footer, Instruction -------------------------------
 
 MAIL_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading/692aba3c5db2bb655feda2e497918193a1a6b496/assets/gmail-white.svg"
 GITHUB_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading/692aba3c5db2bb655feda2e497918193a1a6b496/assets/github-white.svg"
@@ -293,7 +286,8 @@ footer = html.Div(
             [
                 "made by ",
                 html.A(html.B("Trung Dang"),
-                       href="https://dang-trung.github.io/"),
+                       href="https://dang-trung.github.io/",
+                       style={"text-decoration": "underline"}),
                 ", 2020 ",
                 html.Img(src=LOGO_PATH, height="30px",
                          style={"padding-right": "1rem"})
@@ -327,6 +321,9 @@ collapse_button = dbc.Button(
     id="collapse-button",
     className="mb-3",
     color="primary",
+    style={
+        "background-image": "linear-gradient(#1c1e22, #1c1e22 60%, #1c1e22)"
+    }
 )
 
 instructions = html.Div(
@@ -334,15 +331,40 @@ instructions = html.Div(
         html.H2("What Is Base Trading?"),
         html.P(),
         html.P('1. Support (or "Base") refers to the price level that an asset struggles to fall below over a given time period.'),
-        html.P("2. Use"),
-        html.P("3. Use"),
-        html.H2("How To Use"),
+        html.P('2. Usually, the longer this period is, the "stronger" (i.e. harder to be broken) the bases should be.'),
+        html.P("3. If we have an asset with a very bullish outlook in the long term, and some of its supports are broken today (e.g. in a panicked market), we expect (or at least assume) that these price levels will be re-visited eventually at a future date. "),
+        html.P('4. At this date, the previously broken supports will become resistances (an "S/R flip" in T/A terms) since many people who bought at the supports before will want to sell for break-evens.'),
+        html.P('5. We trade this opportunity. This means we buy where supports are broken for some pre-determined percentages (thus the term "buy the dip") and sell where broken supports are re-visited, or even better  PENETRATED for some pre-determined percentages (e.g. in a hyped market).'),
+        html.P("6. To maximize returns/Sharpe/whatever your goals are with this strategy, our job is to optimized the parameters (or even the strategy itself if you can) and backtested them with the assets you'd like to trade. "),
+        html.H2("How Do I Start?"),
         html.P(),
-        html.P("1. Use"),
-        html.P("2. Use"),
-        html.P("3. Use"),
+        html.P(["1. Choose a data source (for now only Yahoo! Finance). The app supports any asset ticker that could be found on their ", html.B(html.A("site.", href="https://finance.yahoo.com/", style={"text-decoration": "underline"}))]),
+        html.P("2. Dates and marked prices are trivially explained."),
+        html.P("3. Next, set up the initial cash for your simulated portfolio using this strategy. Maximum # of Positions is how many long positions you could enter at most at the same time. Every time you sell, your available number of positions will be refilled."),
+        html.P('4. "Support in (Days)" determines how "strong" your bases are.'),
+        html.P("5. For the last two parameters, you buy when the price drops below any support by the first percentage, and sell when it gets back up and penetrates the previously broken support by the latter percentage."),
+        html.P("6. Submit to see results."),
+        html.H2("What Could Possibly Turn Wrong? "),
+        html.P(),
+        html.P("1. As always, past performance is no guarantee of future results. If you seriously want to backtest a strategy, find a sampling scheme that avoids overfitting the data (e.g. you use the historical prices between 2017 and 2019, and your parameters work damn well during this time, but it gets outperformed badly by the hodling strat during 2020 and 2021. This is overfitting.)"),
+        html.P("2. Mathematically speaking, returns/Sharpe/etc. are merely functions of all parameters you provided, and it is possible that you can find the parameters to optimize those target variables (at least locally). In practice, however, for some markets with meteoric rises like BTC, although it is still possible to find the parameters to outperform the Hodling strategy, it is SUPER hard to do so."),
+        html.H2("How Will This Dashboard Help Actually?"),
+        html.P(),
+        html.P("1. This dashboard helps you play around with the parameters to get a sense of how the strategy would turn out versus a simple Hodling strategy."),
+        html.P("2. From my experiences, base trading works best during bear markets or at the beginning of bull ones. So you may use this during those times."),
+        html.P("3. You can even use it to find very good entries for your Hodling positions and avoid buying local tops (which's gonna hurt your soul for a long time)."),
+        html.H2("Last Notes"),
+        html.P(),
+        html.P("1. The dashboard is only a fun project and not financial advice. If you truly want to mimic the entries/exits with real money, do it at your own risk."),
+        html.P("2. Feel free to contact me if you have some advice for UI improvements or other features."),
+        html.P("3. If you have great fun playing around, a donation is always appreciated!"),
+        html.P(
+            "My ETH address: 0x310E736149d6EDEbE97a27619d617f901FE6626C", 
+            style={"text-align": "center"},
+        )
     ],
-    className="jumbotron"
+    className="jumbotron",
+    style={"text-align": "justify"},
 )
 # ------------------------------ Final Layout --------------------------------
 
@@ -350,7 +372,7 @@ app.layout = html.Div(
     [
         navbar,
         html.P(),
-        dbc.Container(
+        html.Div(
             [
                 collapse_button,
                 dbc.Collapse(
@@ -370,11 +392,14 @@ app.layout = html.Div(
                         dbc.Col(
                             [
                                 inputs,
-                                disclaimer
                             ]),
                     ]
                 ),
             ],
+            style={
+                "padding-left": "2em",
+                "padding-right": "2em",
+            }
         ),
         footer,
         html.P()
@@ -433,16 +458,6 @@ def update_strat(n_clicks, ticker, source, start, end, price, init_cash,
     if n_clicks:
         return figure, strat, stats
     return figure, strat, stats
-
-    # load_output = dbc.Button(
-    #     [
-    #         dbc.Spinner(size="sm"),
-    #         " Submit your inputs..."
-    #     ],
-    #     disabled=True,
-    # )
-    # return load_output, load_output, load_output
-
 
 @app.callback(
     Output("collapse", "is_open"),

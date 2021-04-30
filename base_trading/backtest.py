@@ -23,7 +23,7 @@ class BaseTrader:
         entry/exit prices and backtest)
     """
 
-    def __init__(self, price='Close', valid_days=20,
+    def __init__(self, price, valid_days=20,
                  break_support=0.1, break_resist=0.4, max_pos=5,
                  init_cash=10000):
         """
