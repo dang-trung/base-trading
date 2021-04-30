@@ -15,56 +15,88 @@ COLORS = {
     'sell': '#ea3943',
     'return': '#16c784'
 }
-    
+
+
 def make_figure(data, ticker, price, colors, scale="log"):
+    """
+    Parameters
+    ----------
+    data : DataFrame
+        Contains historical prices and entries/exits processed using
+        backtest.BaseTrader
+    ticker : str
+        Asset ticker
+    price : {"Open", "Close", "High", "Low"}
+        Prices to be used for backtesting
+    colors : dict
+        Color
+    scale : {"linear", "log" }, default="log"
+        Sets the y-axis type of the price graph
+
+    Returns
+    -------
+        fig : go.Figure
+            Represents the price graph
+        strat : go.Figure
+            Represents the graph of portfolio balance if base trading was
+            executed
+    """
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
                         row_heights=[0.7, 0.3],
                         subplot_titles=[ticker.upper(), 'Trading Volume'])
-    price = go.Scatter(x=data['Date'], y=data[price], name=ticker.upper(), showlegend=False, marker_color=colors['text'])
+    price = go.Scatter(x=data['Date'], y=data[price], name=ticker.upper(),
+                       showlegend=False, marker_color=colors['text'])
     fig.add_trace(price, row=1, col=1)
 
-    trace_support = go.Scatter(x=data['Date'], y=data['Support Line'], mode='lines', showlegend=False,                             marker_color=colors['sell'])
+    trace_support = go.Scatter(x=data['Date'], y=data['Support Line'],
+                               mode='lines', showlegend=False,
+                               marker_color=colors['sell'])
     fig.add_trace(trace_support, row=1, col=1)
-    
+
     try:
         trace_buysignals = go.Scatter(x=data['Date'], y=data['Bought Price'],
-                                    name='Buy', mode='markers',
-                                    marker_color=colors['buy'],
-                                    marker_symbol='triangle-up',
-                                    marker_size=15)
+                                      name='Buy', mode='markers',
+                                      marker_color=colors['buy'],
+                                      marker_symbol='triangle-up',
+                                      marker_size=15)
         fig.add_trace(trace_buysignals, row=1, col=1)
     except KeyError:
         print("No base broken.")
-    
+
     try:
         trace_sellsignals = go.Scatter(x=data['Date'], y=data['Sold Price'],
-                                    name='Sell', mode='markers',
-                                    marker_color=colors['sell'],
-                                    marker_symbol='triangle-down',
-                                    marker_size=15)
+                                       name='Sell', mode='markers',
+                                       marker_color=colors['sell'],
+                                       marker_symbol='triangle-down',
+                                       marker_size=15)
         fig.add_trace(trace_sellsignals)
     except KeyError:
         print("No sell has been made. HODLING.")
 
     volume = go.Bar(x=data['Date'], y=data['Volume'], name='Volume',
-                    opacity=1, marker_line_width=0, marker_color=colors['text'],
+                    opacity=1, marker_line_width=0,
+                    marker_color=colors['text'],
                     showlegend=False)
     fig.add_trace(volume, row=2, col=1)
 
-    fig.update_yaxes(type=scale, dtick=0.5, row=1, col=1, tickformat=".3f")
+    if scale == "log":
+        fig.update_yaxes(type=scale, dtick=0.5, row=1, col=1)
+    fig.update_yaxes(row=1, col=1, tickformat=".3f")
 
-    trace_strat = go.Scatter(x=data['Date'], y=data['Base Trading'], mode='lines', showlegend=False, marker_color=colors['text'])
+    trace_strat = go.Scatter(x=data['Date'], y=data['Base Trading'],
+                             mode='lines', showlegend=False,
+                             marker_color=colors['text'])
     strat = go.Figure(data=[trace_strat])
     strat.update_yaxes(rangemode="tozero", showgrid=False)
 
     for figure in [fig, strat]:
         figure.update_layout(
-            plot_bgcolor='rgba(0, 0, 0, 0)', 
+            plot_bgcolor='rgba(0, 0, 0, 0)',
             paper_bgcolor='rgba(0, 0, 0, 0)',
-            font_color=colors['text']
+            font_color=colors['text'],
+            modebar_bgcolor='#1c1e22',
         )
         figure.update_xaxes(showgrid=False, showline=True, automargin=True)
         figure.update_yaxes(showline=True, automargin=True)
 
     return fig, strat
-

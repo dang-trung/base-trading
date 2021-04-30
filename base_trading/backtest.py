@@ -60,10 +60,14 @@ class BaseTrader:
 
         Returns
         -------
-        DataFrame
+        X_copy : DataFrame
             Processed version of the input dataframe, with added columns:
             Support, Bought Price, Sold Price, Strategy Cumulative Returns,
             etc.
+
+        stats : DataFrame
+            Contains performance metrics of Base Trading compared to a
+            simple Buy-and-Hold strategy.
         """
         X_copy = X.copy()
         self._find_support(X_copy)
@@ -151,7 +155,8 @@ class BaseTrader:
         n = len(X) - 1
         stats["Start"] = X.loc[0, "Date"]
         stats["End"] = X.loc[n, "Date"]
-        stats["Duration"] = (stats["End"] - stats["Start"]).apply(lambda x: f"{x.days} days")
+        stats["Duration"] = (stats["End"] - stats["Start"]).apply(
+            lambda x: f"{x.days} days")
         stats["Initial Cash"] = self.init_cash
 
         for strategy in ["Buy & Hold", "Base Trading"]:
@@ -159,28 +164,37 @@ class BaseTrader:
 
         stats["Total Profit"] = stats["Ending Cash"] - stats["Initial Cash"]
         stats["Profit Margin (%)"] = (stats["Total Profit"] /
-                                     stats["Initial Cash"] * 100)
-        stats["Profit Margin (%)"] = stats["Profit Margin (%)"].apply(lambda x: f"{int(x):,}% ({round(x / 100, 2)}x)")
-        stats["Initial Cash"] = stats["Initial Cash"].apply(lambda x: f"${x:,}")
-        stats["Ending Cash"] = stats["Ending Cash"].apply(lambda x: f"${int(x):,}")
-        stats["Total Profit"] = stats["Total Profit"].apply(lambda x: f"${int(x):,}")
+                                      stats["Initial Cash"] * 100)
+        stats["Profit Margin (%)"] = stats["Profit Margin (%)"].apply(
+            lambda x: f"{int(x):,}% ({round(x / 100, 2)}x)")
+        stats["Initial Cash"] = stats["Initial Cash"].apply(
+            lambda x: f"${x:,}")
+        stats["Ending Cash"] = stats["Ending Cash"].apply(
+            lambda x: f"${int(x):,}")
+        stats["Total Profit"] = stats["Total Profit"].apply(
+            lambda x: f"${int(x):,}")
         stats.loc["Buy & Hold", "Annualized Return (%)"] = np.average(
             X["Market Return"][2:])
         stats.loc["Base Trading", "Annualized Return (%)"] = np.average(
             X["Strategy Return"][2:])
-        stats["Annualized Return (%)"] = ((stats["Annualized Return (%)"] + 1)** 365 - 1) * 100
+        stats["Annualized Return (%)"] = ((stats[
+                                               "Annualized Return (%)"] + 1)
+                                          ** 365 - 1) * 100
         stats.loc["Buy & Hold", "Annualized Volatility (%)"] = np.std(
             X["Market Return"][2:])
         stats.loc["Base Trading", "Annualized Volatility (%)"] = np.std(
-            X["Strategy Return"][2:]) 
-        stats["Annualized Volatility (%)"] = (stats["Annualized Volatility (%)"]) * np.sqrt(365) * 100
+            X["Strategy Return"][2:])
+        stats["Annualized Volatility (%)"] = (stats[
+            "Annualized Volatility (%)"]) * np.sqrt(365) * 100
         stats["Sharpe Ratio"] = ((stats["Annualized Return (%)"] - 0.08) /
                                  stats["Annualized Volatility (%)"])
-        stats["Annualized Return (%)"] = stats["Annualized Return (%)"].apply(lambda x: f"{round(x, 2)}%")
-        stats["Annualized Volatility (%)"] = stats["Annualized Volatility (%)"].apply(lambda x: f"{round(x, 2)}%")
-        stats["Sharpe Ratio"] = stats["Sharpe Ratio"].apply(lambda x: round(x, 2))
-        
+        stats["Annualized Return (%)"] = stats["Annualized Return (%)"].apply(
+            lambda x: f"{round(x, 2)}%")
+        stats["Annualized Volatility (%)"] = stats[
+            "Annualized Volatility (%)"].apply(lambda x: f"{round(x, 2)}%")
+        stats["Sharpe Ratio"] = stats["Sharpe Ratio"].apply(
+            lambda x: round(x, 2))
+
         stats = stats.T.reset_index()
         stats.rename(columns={"index": "Metrics"}, inplace=True)
         return stats
-

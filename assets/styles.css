@@ -1,17 +1,22 @@
 h1, h2, h3, h4, h5, h6 {
-    color: #fff;
-    text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
-    text-align: center;
-    line-height: 2;
-  }
-
-.bg-dark {
-    background-color: #1c1e22 !important;
+  color: #fff;
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
+  text-align: center;
+  line-height: 2;
 }
 
 body {
     color: #fff;
 }
+
+a-special {
+  text-decoration: underline;
+}
+
+.bg-dark {
+    background-color: #1c1e22 !important;
+}
+
 
 .input-group-text {
     display: -ms-flexbox;
@@ -30,7 +35,3 @@ body {
     border: 1px solid #fff;
     border-radius: 0.25rem;
   }
-
-a-special {
-  text-decoration: underline;
-}

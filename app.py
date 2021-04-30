@@ -14,7 +14,6 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-from dash_html_components.A import A
 
 from base_trading.data import Collector, SourceNotSupported
 from base_trading.backtest import BaseTrader
@@ -25,12 +24,13 @@ app.title = 'Base Trading: Buy the Dip, Sell the Hype'
 server = app.server
 
 # -------------------------------- Navbar --------------------------------
-LOGO_PATH = "https://raw.githubusercontent.com/dang-trung/base-trading/master" \
-    "/assets/logo.png"
+LOGO_PATH = "https://raw.githubusercontent.com/dang-trung/base-trading" \
+            "/master" \
+            "/assets/logo.png"
 
 logo = dbc.Col(
     html.Img(src=LOGO_PATH, height="30px", style={
-             "padding-left": "2em", "padding-right": "1em"}),
+        "padding-left": "1em", "padding-right": "1em"}),
     width="auto"
 )
 
@@ -39,36 +39,55 @@ brand = dbc.Col(
     width="auto"
 )
 
-
 dropdown = dbc.Col(
     dbc.DropdownMenu(
         label="More",
         children=[
             dbc.DropdownMenuItem(
-                "Source Code", href="https://github.com/dang-trung/base-trading"
+                "Source Code",
+                href="https://github.com/dang-trung/base-trading"
             ),
             dbc.DropdownMenuItem(
-                "Feedback/Bug Report", href=f"mailto:dangtrung96@gmail.com"
+                "Feedback/Bug Report",
+                href=f"mailto:dangtrung96@gmail.com?subject=[Base Trading "
+                     f"Backtester] Feedback"
             ),
+            dbc.DropdownMenuItem(
+                "Feature Request",
+                href=f"mailto:dangtrung96@gmail.com?subject=[Base Trading "
+                     f"Backtester] Feature Request"
+            )
         ],
+        direction="left",
         in_navbar=True
     ),
-    width={"offset": 7},
-    style={"padding-left": "5em"}
+    width={"size": "auto", "offset": 7},
+    style={"padding-right": "2em"}
 )
 
 navbar = html.Div(
     [
         dbc.Row(
-            [logo, brand, dropdown],
-            align="center", no_gutters=True
+            [
+                dbc.Col(
+                    dbc.Row(
+                        [
+                            logo,
+                            brand
+                        ],
+                        align="center", no_gutters=True
+                    )
+                ),
+                dropdown],
+            no_gutters=True,
+            justify="around",
         ),
     ],
-    # className="navbar navbar-expand-lg navbar-dark bg-dark",
-    style={"background-color": "#1c1e22"}
+    style={"background-color": "#1c1e22"},
 )
 
-# -------------------------------- App Settings --------------------------------
+# -------------------------------- App Settings
+# --------------------------------
 
 inputs = html.Div(
     [
@@ -172,7 +191,7 @@ inputs = html.Div(
                         [
                             dbc.InputGroupAddon("Initial Cash ($)"),
                             dbc.Input(id="init-cash",
-                                      type="number", value=10000)
+                                      type="number", value=10000, min=0)
                         ]
                     )
                 ),
@@ -185,7 +204,8 @@ inputs = html.Div(
                     dbc.InputGroup(
                         [
                             dbc.InputGroupAddon("Maximum # of Positions"),
-                            dbc.Input(id="max-pos", type="number", value=5)
+                            dbc.Input(id="max-pos", type="number", min=0,
+                                      value=5)
                         ]
                     )
                 ),
@@ -198,7 +218,8 @@ inputs = html.Div(
                     dbc.InputGroup(
                         [
                             dbc.InputGroupAddon("Support in (Days)"),
-                            dbc.Input(id="valid-days", type="number", value=20)
+                            dbc.Input(id="valid-days", type="number", value=20,
+                                      min=1)
                         ]
                     )
                 ),
@@ -212,7 +233,7 @@ inputs = html.Div(
                         [
                             dbc.InputGroupAddon("Drop from Support (%)"),
                             dbc.Input(id="break-support",
-                                      type="number", value=10)
+                                      type="number", value=10, min=0, max=100)
                         ]
                     )
                 ),
@@ -226,11 +247,31 @@ inputs = html.Div(
                         [
                             dbc.InputGroupAddon("Break from Support (%)"),
                             dbc.Input(id="break-resist",
-                                      type="number", value=40)
+                                      type="number", value=40, min=0, max=100)
                         ]
                     )
                 ),
             ]
+        ),
+        html.P(),
+        dbc.Row(
+            dbc.Col(
+                [
+                    dbc.InputGroup(
+                        [
+                            dbc.InputGroupAddon(
+                                "Price Scale", addon_type="prepend"),
+                            dbc.Select(
+                                id="graph-scale",
+                                options=[
+                                    {"label": "Logarithm", "value": "log"},
+                                    {"label": "Linear", "value": "linear"},
+                                ],
+                                value="log")
+                        ]
+                    )
+                ]
+            )
         ),
         html.P(),
         html.P(),
@@ -276,9 +317,14 @@ table = html.Div(
 
 # ------------------------- Footer, Instruction -------------------------------
 
-MAIL_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading/692aba3c5db2bb655feda2e497918193a1a6b496/assets/gmail-white.svg"
-GITHUB_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading/692aba3c5db2bb655feda2e497918193a1a6b496/assets/github-white.svg"
-LINKEDIN_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading/692aba3c5db2bb655feda2e497918193a1a6b496/assets/linkedin-white.svg"
+MAIL_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading" \
+            "/692aba3c5db2bb655feda2e497918193a1a6b496/assets/gmail-white.svg"
+GITHUB_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading" \
+              "/692aba3c5db2bb655feda2e497918193a1a6b496/assets/github-white" \
+              ".svg"
+LINKEDIN_ICON = "https://raw.githubusercontent.com/dang-trung/base-trading" \
+                "/692aba3c5db2bb655feda2e497918193a1a6b496/assets/linkedin" \
+                "-white.svg"
 
 footer = html.Div(
     [
@@ -330,36 +376,101 @@ instructions = html.Div(
     [
         html.H2("What Is Base Trading?"),
         html.P(),
-        html.P('1. Support (or "Base") refers to the price level that an asset struggles to fall below over a given time period.'),
-        html.P('2. Usually, the longer this period is, the "stronger" (i.e. harder to be broken) the bases should be.'),
-        html.P("3. If we have an asset with a very bullish outlook in the long term, and some of its supports are broken today (e.g. in a panicked market), we expect (or at least assume) that these price levels will be re-visited eventually at a future date. "),
-        html.P('4. At this date, the previously broken supports will become resistances (an "S/R flip" in T/A terms) since many people who bought at the supports before will want to sell for break-evens.'),
-        html.P('5. We trade this opportunity. This means we buy where supports are broken for some pre-determined percentages (thus the term "buy the dip") and sell where broken supports are re-visited, or even better  PENETRATED for some pre-determined percentages (e.g. in a hyped market).'),
-        html.P("6. To maximize returns/Sharpe/whatever your goals are with this strategy, our job is to optimized the parameters (or even the strategy itself if you can) and backtested them with the assets you'd like to trade. "),
+        html.P(
+            '1. Support (or "Base") refers to the price level that an asset '
+            'struggles to fall below over a given time period.'),
+        html.P(
+            '2. Usually, the longer this period is, the "stronger" (i.e. '
+            'harder to be broken) the bases should be.'),
+        html.P(
+            "3. If we have an asset with a very bullish outlook in the long "
+            "term, and some of its supports are broken today (e.g. in a "
+            "panicked market), we expect (or at least assume) that these "
+            "price levels will be re-visited eventually at a future date. "),
+        html.P(
+            '4. At this date, the previously broken supports will become '
+            'resistances (an "S/R flip" in T/A terms) since many people who '
+            'bought at the supports before will want to sell for '
+            'break-evens.'),
+        html.P(
+            '5. We trade this opportunity. This means we buy where supports '
+            'are broken for some pre-determined percentages (thus the term '
+            '"buy the dip") and sell where broken supports are re-visited, '
+            'or even better  PENETRATED for some pre-determined percentages '
+            '(e.g. in a hyped market).'),
+        html.P(
+            "6. To maximize returns/Sharpe/whatever your goals are with this "
+            "strategy, our job is to optimized the parameters (or even the "
+            "strategy itself if you can) and backtested them with the assets "
+            "you'd like to trade. "),
         html.H2("How Do I Start?"),
         html.P(),
-        html.P(["1. Choose a data source (for now only Yahoo! Finance). The app supports any asset ticker that could be found on their ", html.B(html.A("site.", href="https://finance.yahoo.com/", style={"text-decoration": "underline"}))]),
+        html.P([
+            "1. Choose a data source (for now only Yahoo! Finance). "
+            "The app supports any asset ticker that could be found on "
+            "their ",
+            html.B(html.A("site.", href="https://finance.yahoo.com/",
+                          style={"text-decoration": "underline"}))]),
         html.P("2. Dates and marked prices are trivially explained."),
-        html.P("3. Next, set up the initial cash for your simulated portfolio using this strategy. Maximum # of Positions is how many long positions you could enter at most at the same time. Every time you sell, your available number of positions will be refilled."),
-        html.P('4. "Support in (Days)" determines how "strong" your bases are.'),
-        html.P("5. For the last two parameters, you buy when the price drops below any support by the first percentage, and sell when it gets back up and penetrates the previously broken support by the latter percentage."),
+        html.P(
+            "3. Next, set up the initial cash for your simulated portfolio "
+            "using this strategy. Maximum # of Positions is how many long "
+            "positions you could enter at most at the same time. Every time "
+            "you sell, your available number of positions will be refilled."),
+        html.P(
+            '4. "Support in (Days)" determines how "strong" your bases are.'),
+        html.P(
+            "5. For the last two parameters, you buy when the price drops "
+            "below any support by the first percentage, and sell when it "
+            "gets back up and penetrates the previously broken support by "
+            "the latter percentage."),
         html.P("6. Submit to see results."),
         html.H2("What Could Possibly Turn Wrong? "),
         html.P(),
-        html.P("1. As always, past performance is no guarantee of future results. If you seriously want to backtest a strategy, find a sampling scheme that avoids overfitting the data (e.g. you use the historical prices between 2017 and 2019, and your parameters work damn well during this time, but it gets outperformed badly by the hodling strat during 2020 and 2021. This is overfitting.)"),
-        html.P("2. Mathematically speaking, returns/Sharpe/etc. are merely functions of all parameters you provided, and it is possible that you can find the parameters to optimize those target variables (at least locally). In practice, however, for some markets with meteoric rises like BTC, although it is still possible to find the parameters to outperform the Hodling strategy, it is SUPER hard to do so."),
+        html.P(
+            "1. As always, past performance is no guarantee of future "
+            "results. If you seriously want to backtest a strategy, find a "
+            "sampling scheme that avoids overfitting the data (e.g. you use "
+            "the historical prices between 2017 and 2019, and your "
+            "parameters work damn well during this time, but it gets "
+            "outperformed badly by the hodling strat during 2020 and 2021. "
+            "This is overfitting.)"),
+        html.P(
+            "2. Mathematically speaking, returns/Sharpe/etc. are merely "
+            "functions of all parameters you provided, and it is possible "
+            "that you can find the parameters to optimize those target "
+            "variables (at least locally). In practice, however, for some "
+            "markets with meteoric rises like BTC, although it is still "
+            "possible to find the parameters to outperform the Hodling "
+            "strategy, it is SUPER hard to do so."),
         html.H2("How Will This Dashboard Help Actually?"),
         html.P(),
-        html.P("1. This dashboard helps you play around with the parameters to get a sense of how the strategy would turn out versus a simple Hodling strategy."),
-        html.P("2. From my experiences, base trading works best during bear markets or at the beginning of bull ones. So you may use this during those times."),
-        html.P("3. You can even use it to find very good entries for your Hodling positions and avoid buying local tops (which's gonna hurt your soul for a long time)."),
+        html.P(
+            "1. This dashboard helps you play around with the parameters to "
+            "get a sense of how the strategy would turn out versus a simple "
+            "Hodling strategy."),
+        html.P(
+            "2. From my experiences, base trading works best during bear "
+            "markets or at the beginning of bull ones. So you may use this "
+            "during those times."),
+        html.P(
+            "3. You can even use it to find very good entries for your "
+            "Hodling positions and avoid buying local tops (which's gonna "
+            "hurt your soul for a long time)."),
         html.H2("Last Notes"),
         html.P(),
-        html.P("1. The dashboard is only a fun project and not financial advice. If you truly want to mimic the entries/exits with real money, do it at your own risk."),
-        html.P("2. Feel free to contact me if you have some advice for UI improvements or other features."),
-        html.P("3. If you have great fun playing around, a donation is always appreciated!"),
         html.P(
-            "My ETH address: 0x310E736149d6EDEbE97a27619d617f901FE6626C", 
+            "1. The dashboard is only a fun project and not financial "
+            "advice. If you truly want to mimic the entries/exits with real "
+            "money, do it at your own risk."),
+        html.P(
+            "2. Feel free to contact me if you have some advice for UI "
+            "improvements or other features."),
+        html.P(
+            "3. If you have great fun playing around, a donation is always "
+            "appreciated!"),
+        html.P(
+            "My ETH address: 0x310E736149d6EDEbE97a27619d617f901FE6626C",
             style={"text-align": "center"},
         )
     ],
@@ -427,10 +538,15 @@ app.layout = html.Div(
         State("valid-days", "value"),
         State("break-support", "value"),
         State("break-resist", "value"),
+        State("graph-scale", "value"),
     ]
 )
 def update_strat(n_clicks, ticker, source, start, end, price, init_cash,
-                 max_pos, valid_days, break_support, break_resist):
+                 max_pos, valid_days, break_support, break_resist, scale):
+    """
+    Callback functions to generate the price graph with signals and the
+    graph of portfolio performance if base trading is executed.
+    """
     data_path = os.path.join("data", f"{ticker}.csv")
     break_support /= 100
     break_resist /= 100
@@ -449,15 +565,16 @@ def update_strat(n_clicks, ticker, source, start, end, price, init_cash,
         price, valid_days, break_support, break_resist, max_pos, init_cash)
     data, stats = base_trader.execute(data)
 
-    figure, strat = make_figure(data, ticker, price, COLORS)
+    figure, strat = make_figure(data, ticker, price, COLORS, scale)
 
-    figure = dcc.Graph(figure=figure)
-    strat = dcc.Graph(figure=strat)
+    figure = dcc.Graph(figure=figure, config={"displaylogo": False})
+    strat = dcc.Graph(figure=strat, config={"displaylogo": False})
     stats = dbc.Table.from_dataframe(stats)
 
     if n_clicks:
         return figure, strat, stats
     return figure, strat, stats
+
 
 @app.callback(
     Output("collapse", "is_open"),
@@ -465,6 +582,9 @@ def update_strat(n_clicks, ticker, source, start, end, price, init_cash,
     [State("collapse", "is_open")],
 )
 def toggle_collapse(n, is_open):
+    """
+    Toggle button to show instructions
+    """
     if n:
         return not is_open
     return is_open
