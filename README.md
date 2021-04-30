@@ -15,14 +15,13 @@
     A web application to backtest Base Trading Strategy
   </p>
 
-## Project Description
-### Introduction
+## Introduction
 
 * **Objective**: This app creates a dashboard using Dash to visualize and backtest base trading Strategy.
 
 * **Status**: On Hold
 
-### Features
+## Features
 - Supports all Yahoo! Finance tickers
 - Allows to choose entry and exit patterns following base trading strategy
 - Performs backtesting on selected signals automatically
@@ -31,10 +30,10 @@
 - Compares base trading with simple holding
 - Responsive design using Dash Bootstrap Components
 
-### Live Version
+## Live Version
 https://base-trading.herokuapp.com/
 
-### Dependencies
+## Dependencies
 * Python 3
 * dash==1.13.3
 * dash_bootstrap_components==0.12.0
@@ -45,7 +44,7 @@ https://base-trading.herokuapp.com/
 * scipy==1.6.0
 * gunicorn==20.0.4
 
-### How to Run
+## How to Run
 1. Clone this repo:
 `$ git clone https://github.com/dang-trung/base-trading`
 1. Create your environment (virtualenv):  
@@ -56,10 +55,10 @@ https://base-trading.herokuapp.com/
 1. Run the app:  
 `$ python app.py`
 
-### Screenshot
+## Screenshot
 ![screenshot.png](https://raw.githubusercontent.com/dang-trung/base-trading/master/assets/screenshot.png)
 
-### What Is Base Trading?
+## What Is Base Trading?
 1. Support (or "Base") refers to the price level that an asset struggles to fall below over a given time period.
 
 2. Usually, the longer this period is, the "stronger" (i.e. harder to be broken) the bases should be.
