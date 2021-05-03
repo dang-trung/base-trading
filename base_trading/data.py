@@ -120,13 +120,3 @@ class SourceNotSupported(Exception):
     Raised when the data source is unsupported
     """
     pass
-
-
-if __name__ == '__main__':
-    start = '2016-01-01'
-    end = '2021-01-01'
-    ticker = 'ETH-USD'
-    data_path = os.path.join('data', f'{ticker}.csv')
-
-    collector = Collector(ticker, start, end, data_path)
-    data = collector.get_historical()
