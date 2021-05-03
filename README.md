@@ -17,7 +17,7 @@
 
 ## Introduction
 
-* **Objective**: This app creates a dashboard using Dash to visualize and backtest base trading Strategy.
+* **Objective**: This app creates a dashboard using Dash to visualize and backtest base trading strategy.
 
 * **Status**: On Hold
 
