@@ -23,7 +23,7 @@ class BaseTrader:
         entry/exit prices and backtest)
     """
 
-    def __init__(self, price, valid_days=20,
+    def __init__(self, price="Close", valid_days=20,
                  break_support=0.1, break_resist=0.4, max_pos=5,
                  init_cash=10000):
         """
@@ -165,33 +165,29 @@ class BaseTrader:
         stats["Total Profit"] = stats["Ending Cash"] - stats["Initial Cash"]
         stats["Profit Margin (%)"] = (stats["Total Profit"] /
                                       stats["Initial Cash"] * 100)
-        stats["Profit Margin (%)"] = stats["Profit Margin (%)"].apply(
-            lambda x: f"{int(x):,}% ({round(x / 100, 2)}x)")
-        stats["Initial Cash"] = stats["Initial Cash"].apply(
-            lambda x: f"${x:,}")
-        stats["Ending Cash"] = stats["Ending Cash"].apply(
-            lambda x: f"${int(x):,}")
-        stats["Total Profit"] = stats["Total Profit"].apply(
-            lambda x: f"${int(x):,}")
-        stats.loc["Buy & Hold", "Annualized Return (%)"] = np.average(
-            X["Market Return"][2:])
-        stats.loc["Base Trading", "Annualized Return (%)"] = np.average(
-            X["Strategy Return"][2:])
-        stats["Annualized Return (%)"] = ((stats[
-                                               "Annualized Return (%)"] + 1)
-                                          ** 365 - 1) * 100
+        stats["Annualized Return (%)"] = ((stats["Ending Cash"] / 
+                                          stats["Initial Cash"]) ** 
+                                          (365 / n) - 1) * 100
+
         stats.loc["Buy & Hold", "Annualized Volatility (%)"] = np.std(
             X["Market Return"][2:])
         stats.loc["Base Trading", "Annualized Volatility (%)"] = np.std(
             X["Strategy Return"][2:])
         stats["Annualized Volatility (%)"] = (stats[
             "Annualized Volatility (%)"]) * np.sqrt(365) * 100
+
         stats["Sharpe Ratio"] = ((stats["Annualized Return (%)"] - 0.08) /
                                  stats["Annualized Volatility (%)"])
-        stats["Annualized Return (%)"] = stats["Annualized Return (%)"].apply(
-            lambda x: f"{round(x, 2)}%")
-        stats["Annualized Volatility (%)"] = stats[
-            "Annualized Volatility (%)"].apply(lambda x: f"{round(x, 2)}%")
+
+        for col in ["Initial Cash", "Ending Cash", "Total Profit"]:
+            stats[col] = stats[col].apply(lambda x: f"${int(x):,}")
+
+        stats["Profit Margin (%)"] = stats["Profit Margin (%)"].apply(
+            lambda x: f"{int(x):,}% ({round(x / 100, 2)}x)")
+
+        for col in ["Annualized Return (%)", "Annualized Volatility (%)"]:
+            stats[col] = stats[col].apply(lambda x: f"{round(x, 2)}%")
+
         stats["Sharpe Ratio"] = stats["Sharpe Ratio"].apply(
             lambda x: round(x, 2))
 

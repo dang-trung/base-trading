@@ -424,7 +424,9 @@ instructions = html.Div(
             "below any support by the first percentage, and sell when it "
             "gets back up and penetrates the previously broken support by "
             "the latter percentage."),
-        html.P("6. Submit to see results."),
+        html.P(
+            "6. You can also choose to view the graph in log or linear scale."),
+        html.P("7. Submit to see results."),
         html.H2("What Could Possibly Turn Wrong? "),
         html.P(),
         html.P(
